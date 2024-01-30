@@ -1,0 +1,51 @@
+config:
+  target: "https://api.chucknorris.io"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+scenarios:
+  - flow:
+      - get:
+          url: "/jokes/random"
+      - post:
+          url: "/comments"
+          json:
+            postId: 1
+            name: "Chuck Norris"
+            email: "chuck@norris.com"
+            body: "{{ payload }}"
+  - flow:
+      - get:
+          url: "/jokes/random"
+      - post:
+          url: "/comments"
+          json:
+            postId: 2
+            name: "John Doe"
+            email: "john@doe.com"
+            body: "{{ payload }}"
+
+payload:
+  - "./payload_data.json"
+
+hooks:
+  - beforeRequest: "./before_request_hook.js"
+  - afterResponse: "./after_response_hook.js"
+
+scenariosPerSecond: 5
+
+defaults:
+  # Definiuje metryki do walidacji
+  validate:
+    - name: "latency" # Opóźnienie
+      value: "p95" # 95 percentyl
+      # Oczekiwane opóźnienie poniżej 500 ms
+      target: 500
+    - name: "rps" # Żądania na sekundę
+      # Oczekiwana liczba żądań na sekundę pomiędzy 3 a 7
+      min: 3
+      max: 7
+    - name: "p95" # 95 percentyl
+      # Oczekiwany czas poniżej 700 ms
+      target: 700
